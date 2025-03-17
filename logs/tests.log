@@ -1,0 +1,19 @@
+ERROR    tests.conftest:conftest.py:58 Failed to launch persistent browser context: BrowserType.launch: 
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ Host system is missing dependencies to run browsers.                                       ║
+║ This is most likely due to Docker image version not matching Playwright version:           ║
+║ - Playwright  : 1.51.1                                                                     ║
+║ - Docker image: 1.49.1                                                                     ║
+║                                                                                            ║
+║ Either:                                                                                    ║
+║ - (recommended) use Docker image "mcr.microsoft.com/playwright/python:v1.51.1-noble"       ║
+║ - (alternative 1) run the following command inside Docker to install missing dependencies: ║
+║                                                                                            ║
+║     sudo playwright install-deps                                                           ║
+║                                                                                            ║
+║ - (alternative 2) use apt inside Docker:                                                   ║
+║                                                                                            ║
+║     sudo apt-get install libgtk-4-1                                                        ║
+║                                                                                            ║
+║ <3 Playwright Team                                                                         ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
