@@ -10,6 +10,9 @@ This project is a web automation framework using Python and Playwright. It is de
 - `utils/`: Utility functions and configurations.
 - `controller/`: Controller class for managing the automation flow.
 - `main.py`: Main program for usage example.
+- `driver.py`: Playwright briwser driver setup and config.
+- `logger.py`: Logger setup and config.
+- `config.ini`: Application configuration.
 - `pytest.ini`: Pytest configuration.
 - `README.md`: This file.
 
