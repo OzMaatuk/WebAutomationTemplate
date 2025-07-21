@@ -1,0 +1,10 @@
+# Core Libraries
+playwright
+
+# Configuration
+python-dotenv
+configparser
+
+# Testing
+pytest
+pytest-mock
