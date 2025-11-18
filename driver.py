@@ -1,36 +1,70 @@
+"""Playwright driver setup and configuration."""
 import logging
 from typing import Optional
+from pathlib import Path
 from playwright.sync_api import sync_playwright, Page, BrowserContext, Playwright
 from constants.settings import Settings
 
 logger = logging.getLogger(__name__)
 
+
 class PlaywrightDriver:
     """
-    Basic Playwright driver operations: initialization, context, and teardown.
+    Playwright driver for browser automation.
+    Manages browser lifecycle and provides context manager support.
     """
-    def __init__(self, headless: bool = Settings().HEADLESS, timeout: int = Settings().TIMEOUT, user_data_dir: str = ""):
+    
+    def __init__(
+        self,
+        headless: Optional[bool] = None,
+        timeout: Optional[int] = None,
+        user_data_dir: Optional[str] = None
+    ):
+        """
+        Initialize Playwright driver.
+        
+        Args:
+            headless: Run browser in headless mode (default: from settings)
+            timeout: Default timeout in milliseconds (default: from settings)
+            user_data_dir: Browser profile directory (default: .browser_data)
+        """
         logger.info("Initializing PlaywrightDriver parameters...")
-        self.headless = headless
-        self.timeout = timeout
-        self.user_data_dir = user_data_dir
+        settings = Settings()
+        
+        # Use provided values or fall back to settings/defaults
+        self.headless = headless if headless is not None else settings.HEADLESS
+        self.timeout = timeout if timeout is not None else settings.TIMEOUT
+        self.user_data_dir = user_data_dir or str(Path.cwd() / ".browser_data")
+        
         self._playwright: Optional[Playwright] = None
         self._browser_context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
+        
         self.initialize_driver()
-        logger.debug("PlaywrightDriver parameters set.")
-
+        logger.debug("PlaywrightDriver initialized successfully")
+    
+    def __enter__(self) -> 'PlaywrightDriver':
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit with cleanup."""
+        self.close()
+    
     def initialize_driver(self) -> None:
-        """Initializes Playwright, browser context, and page."""
+        """Initialize Playwright, browser context, and page."""
         logger.info("Initializing Playwright driver...")
         try:
             self._playwright = sync_playwright().start()
+            
+            # Create persistent context for session persistence
             self._browser_context = self._playwright.chromium.launch_persistent_context(
                 user_data_dir=self.user_data_dir,
                 headless=self.headless,
                 ignore_https_errors=True,
                 timeout=self.timeout,
-                # Performance optimizations
+                viewport={'width': 1920, 'height': 1080},
+                # Performance and stealth optimizations
                 args=[
                     '--disable-blink-features=AutomationControlled',
                     '--disable-dev-shm-usage',
@@ -47,36 +81,72 @@ class PlaywrightDriver:
                     '--no-sandbox',
                     '--no-first-run',
                     '--no-default-browser-check',
-                    '--single-process'
                 ],
             )
-            self.page = self._browser_context.pages[0] if self._browser_context.pages else self._browser_context.new_page()
+            
+            # Get or create page
+            if self._browser_context.pages:
+                self.page = self._browser_context.pages[0]
+            else:
+                self.page = self._browser_context.new_page()
+            
             self.page.set_default_timeout(self.timeout)
-            logger.info("Playwright browser and page successfully initialized.")
+            
+            logger.info("Playwright browser and page successfully initialized")
+            
         except Exception as e:
             logger.error(f"Failed to initialize Playwright driver: {e}", exc_info=True)
             self.close()
             raise
-
+    
     def close(self) -> None:
-        """Closes the browser context and stops Playwright."""
+        """Close browser context and stop Playwright."""
         logger.info("Closing Playwright browser context and stopping Playwright...")
         try:
             if self._browser_context:
                 self._browser_context.close()
                 self._browser_context = None
                 self.page = None
+                logger.debug("Browser context closed")
+            
             if self._playwright:
                 self._playwright.stop()
                 self._playwright = None
-            logger.debug("Playwright resources closed.")
+                logger.debug("Playwright stopped")
+            
+            logger.info("Playwright resources closed successfully")
+            
         except Exception as e:
             logger.error(f"Error while closing Playwright resources: {e}", exc_info=True)
+    
+    def new_page(self) -> Page:
+        """
+        Create a new page in the current context.
+        
+        Returns:
+            New page object
+        """
+        if not self._browser_context:
+            raise RuntimeError("Browser context not initialized")
+        
+        page = self._browser_context.new_page()
+        page.set_default_timeout(self.timeout)
+        return page
+
 
 def initialize_driver(headless: bool = True, user_data_dir: str = "") -> Page:
     """
     Legacy initialization function for backward compatibility.
-    Returns the page object instead of browser context for direct usage.
+    
+    Args:
+        headless: Run browser in headless mode
+        user_data_dir: Browser profile directory
+        
+    Returns:
+        Page object for direct usage
+        
+    Note:
+        Consider using PlaywrightDriver class with context manager instead.
     """
     driver = PlaywrightDriver(headless=headless, user_data_dir=user_data_dir)
     return driver.page

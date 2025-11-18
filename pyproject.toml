@@ -1,0 +1,70 @@
+# Modern Python project configuration
+# This file replaces setup.py completely
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "web-automation-template"
+version = "1.0.0"
+description = "Web automation framework template using Playwright"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["playwright", "automation", "web-scraping", "testing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "playwright>=1.48.0",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-playwright>=0.5.2",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.7.4",
+    "mypy>=1.13.0",
+    "black>=24.10.0",
+]
+
+[project.scripts]
+web-automation = "main:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/web-automation-template"
+Repository = "https://github.com/yourusername/web-automation-template"
+
+# Tool configurations
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
