@@ -33,7 +33,8 @@
             },
             "args": [
                 "-s",
-                "tests"
+                "tests",
+                "--log-file=logs/tests.log"
             ],
         }
     ]
