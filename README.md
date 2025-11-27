@@ -48,7 +48,7 @@ A production-ready web automation framework template using Python and Playwright
 ## Installation
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.12 or higher
 - pip
 
 ### Setup

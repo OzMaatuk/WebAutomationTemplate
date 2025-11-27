@@ -1,1 +1,1 @@
-ITEM_DETAILS = ''
+ITEM_DETAILS = ""

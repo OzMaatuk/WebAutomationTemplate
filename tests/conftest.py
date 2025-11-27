@@ -1,12 +1,15 @@
 """Pytest configuration and fixtures for web automation tests."""
+
 import logging
 from typing import Generator
+
 import pytest
-from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page, Playwright
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
+
 from constants.settings import Settings
-from pages.login_page import LoginPage
-from pages.item_page import ItemPage
 from pages.feed_page import FeedPage
+from pages.item_page import ItemPage
+from pages.login_page import LoginPage
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +37,7 @@ def browser(playwright_instance: Playwright, settings: Settings) -> Generator[Br
     try:
         logger.info("Launching browser...")
         browser = playwright_instance.chromium.launch(
-            headless=settings.HEADLESS,
-            args=['--disable-blink-features=AutomationControlled']
+            headless=settings.HEADLESS, args=["--disable-blink-features=AutomationControlled"]
         )
         logger.info("Browser launched successfully")
         yield browser
@@ -51,8 +53,7 @@ def browser(playwright_instance: Playwright, settings: Settings) -> Generator[Br
 def context(browser: Browser) -> Generator[BrowserContext, None, None]:
     """Create new browser context for each test."""
     context = browser.new_context(
-        viewport={'width': 1920, 'height': 1080},
-        ignore_https_errors=True
+        viewport={"width": 1920, "height": 1080}, ignore_https_errors=True
     )
     yield context
     context.close()
@@ -72,10 +73,10 @@ def page(context: BrowserContext, settings: Settings) -> Generator[Page, None, N
 def authenticated_page(page: Page, settings: Settings) -> Generator[Page, None, None]:
     """Provide authenticated page for tests requiring login."""
     login_page = LoginPage(page)
-    
+
     if not settings.USERNAME or not settings.PASSWORD:
         pytest.skip("Username and password required for authenticated tests")
-    
+
     try:
         page.goto(settings.BASE_URL)
         login_page.login(settings.USERNAME, settings.PASSWORD)
@@ -108,21 +109,21 @@ def item_page(page: Page) -> ItemPage:
 def screenshot_on_failure(request, page: Page, settings: Settings):
     """Automatically take screenshot on test failure."""
     yield
-    
+
     # Check if test failed (handle cases where rep_call doesn't exist)
-    if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
+    if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
         try:
-            from pathlib import Path
             from datetime import datetime
-            
+            from pathlib import Path
+
             screenshot_dir = Path(settings.SCREENSHOT_DIR)
             screenshot_dir.mkdir(parents=True, exist_ok=True)
-            
+
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             test_name = request.node.name
             filename = f"failure_{test_name}_{timestamp}.png"
             filepath = screenshot_dir / filename
-            
+
             page.screenshot(path=str(filepath))
             logger.info(f"Failure screenshot saved: {filepath}")
         except Exception as e:
@@ -133,7 +134,7 @@ def screenshot_on_failure(request, page: Page, settings: Settings):
 def pytest_runtest_makereport(item, call):
     """
     Hook to capture test result for screenshot fixture.
-    
+
     This is a pytest hook that runs after each test phase (setup, call, teardown).
     It stores the test result so the screenshot_on_failure fixture can check if the test failed.
     You don't need to modify this unless you want to change screenshot behavior.

@@ -1,11 +1,12 @@
 """Utility modules for web automation framework."""
+
 from .exceptions import (
     AutomationError,
-    LoginError,
+    ConfigurationError,
     ElementNotFoundError,
+    LoginError,
     NavigationError,
     TimeoutError,
-    ConfigurationError,
 )
 
 __all__ = [
